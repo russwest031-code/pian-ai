@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f0eee7">
+  <title>偏爱 · 私人电影引擎</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="brand" data-view="recommend"><b>偏爱</b><span>PIAN AI</span></button>
+    <nav>
+      <button data-view="search">搜索</button>
+      <button class="active" data-view="recommend">推荐</button>
+      <button data-view="charts">榜单</button>
+      <button data-view="profile">我的口味</button>
+    </nav>
+    <button class="token-button" id="libraryStatus">检测片库</button>
+  </header>
+
+  <main>
+    <section class="view" id="searchView">
+      <div class="page-head search-head">
+        <span class="kicker">SEARCH BY TITLE OR FEELING</span>
+        <h1>描述你想看的，<br><em>不必记得片名。</em></h1>
+        <form class="search-box" id="searchForm">
+          <input id="searchInput" autocomplete="off" placeholder="试试：90年代的韩国悬疑片，压抑一点，两个小时内">
+          <button>搜索</button>
+        </form>
+        <div class="search-examples">
+          <span>你可以搜</span>
+          <button>银翼杀手</button><button>轻松的法国爱情片</button><button>近十年高分科幻</button><button>适合深夜一个人看</button>
+        </div>
+      </div>
+      <div class="result-bar"><h2 id="searchTitle">搜索结果</h2><span id="searchMeta">输入片名或描述开始搜索</span></div>
+      <div class="movie-grid" id="searchGrid"></div>
+      <button class="load-more hidden" id="searchMore">继续加载</button>
+    </section>
+
+    <section class="view active" id="recommendView">
+      <div class="page-head recommend-head">
+        <span class="kicker">YOUR PERSONAL CINEMA STREAM</span>
+        <h1>不是大家都喜欢的，<br><em>是你会喜欢的。</em></h1>
+        <p id="profileSentence">正在根据你的评分与搜索记录构建口味。</p>
+        <div class="taste-tags" id="tasteTags"></div>
+      </div>
+      <div class="result-bar"><h2>为你推荐</h2><span id="recommendMeta"></span></div>
+      <div class="movie-grid" id="recommendGrid"></div>
+      <button class="load-more" id="recommendMore">换一批推荐</button>
+    </section>
+
+    <section class="view" id="chartsView">
+      <div class="page-head compact-head">
+        <span class="kicker">EXPLORE WITHOUT END</span>
+        <h1>按你的方式，<em>重排电影史。</em></h1>
+      </div>
+      <div class="filter-panel">
+        <label>国家<select id="countryFilter"><option value="">全球</option><option value="CN">中国大陆</option><option value="HK">中国香港</option><option value="TW">中国台湾</option><option value="US">美国</option><option value="JP">日本</option><option value="KR">韩国</option><option value="FR">法国</option><option value="GB">英国</option><option value="DE">德国</option><option value="IN">印度</option></select></label>
+        <label>类型<select id="genreFilter"><option value="">全部类型</option></select></label>
+        <label>风格<select id="styleFilter"><option value="">全部风格</option><option value="slow">缓慢克制</option><option value="dark">暗黑压抑</option><option value="warm">温暖治愈</option><option value="mind">烧脑高概念</option><option value="visual">视觉风格</option></select></label>
+        <label>年代<select id="decadeFilter"><option value="">全部年代</option><option value="2020">2020年代</option><option value="2010">2010年代</option><option value="2000">2000年代</option><option value="1990">90年代</option><option value="1980">80年代</option><option value="1970">70年代及以前</option></select></label>
+        <label>排序<select id="sortFilter"><option value="vote_average.desc">评分最高</option><option value="popularity.desc">最受关注</option><option value="primary_release_date.desc">最新上映</option><option value="revenue.desc">票房最高</option></select></label>
+        <label>最低评分<input id="scoreFilter" type="range" min="0" max="9" value="6" step="0.5"><output id="scoreOutput">6.0</output></label>
+      </div>
+      <div class="result-bar"><h2 id="chartTitle">全球电影榜</h2><span id="chartMeta">持续加载，不设固定榜单长度</span></div>
+      <div class="rank-list" id="chartGrid"></div>
+      <button class="load-more" id="chartMore">加载更多</button>
+    </section>
+
+    <section class="view" id="profileView">
+      <div class="page-head compact-head"><span class="kicker">YOUR TASTE, EXPLAINED</span><h1>你的口味，<em>由行为定义。</em></h1></div>
+      <div class="profile-layout">
+        <div class="profile-card"><span class="kicker">偏好画像</span><div id="tasteBars"></div></div>
+        <div class="profile-card dark"><span class="kicker">推荐依据</span><h3 id="tasteManifesto"></h3><p>系统综合评分、搜索词、收藏和跳过行为动态调整。所有数据只保存在当前浏览器。</p></div>
+      </div>
+      <div class="result-bar"><h2>我的评分</h2><button class="text-button" id="clearData">清除行为数据</button></div>
+      <div class="rated-list" id="ratedList"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
