@@ -12,5 +12,13 @@ if (-not (Test-Path (Join-Path $project ".env"))) {
   exit 1
 }
 
+$proxyPort = Get-NetTCPConnection -LocalAddress 127.0.0.1 -LocalPort 7890 -State Listen -ErrorAction SilentlyContinue
+if ($proxyPort) {
+  $env:NODE_USE_ENV_PROXY = "1"
+  $env:HTTP_PROXY = "http://127.0.0.1:7890"
+  $env:HTTPS_PROXY = "http://127.0.0.1:7890"
+  Write-Host "已检测到本地代理 127.0.0.1:7890，TMDB 请求将按代理规则连接。" -ForegroundColor Cyan
+}
+
 Start-Process "http://127.0.0.1:4173"
 & $nodePath (Join-Path $project "server.js")

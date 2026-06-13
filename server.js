@@ -4,7 +4,6 @@ const path = require("path");
 const { URL } = require("url");
 
 const ROOT = __dirname;
-const PORT = Number(process.env.PORT || 4173);
 
 function loadEnv() {
   const envPath = path.join(ROOT, ".env");
@@ -19,6 +18,9 @@ function loadEnv() {
 
 loadEnv();
 const token = process.env.TMDB_READ_TOKEN || "";
+const apiKey = process.env.TMDB_API_KEY || "";
+const PORT = Number(process.env.PORT || 4173);
+const tmdbConfigured = Boolean(token || apiKey);
 const allowedPaths = [/^\/discover\/movie$/, /^\/search\/movie$/, /^\/movie\/\d+$/];
 const mime = { ".html":"text/html; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".css":"text/css; charset=utf-8", ".json":"application/json; charset=utf-8" };
 
@@ -28,13 +30,16 @@ function json(res, status, body) {
 }
 
 async function proxyTmdb(req, res, requestUrl) {
-  if (!token) return json(res, 503, {error:"TMDB_READ_TOKEN is not configured"});
+  if (!tmdbConfigured) return json(res, 503, {error:"TMDB credentials are not configured"});
   const apiPath = requestUrl.searchParams.get("path") || "";
   if (!allowedPaths.some(rule => rule.test(apiPath))) return json(res, 400, {error:"Unsupported TMDB path"});
   const target = new URL(`https://api.themoviedb.org/3${apiPath}`);
   requestUrl.searchParams.forEach((value, key) => { if (key !== "path") target.searchParams.set(key, value); });
+  if (!token) target.searchParams.set("api_key", apiKey);
   try {
-    const upstream = await fetch(target, {headers:{Authorization:`Bearer ${token}`, accept:"application/json"}});
+    const headers = {accept:"application/json"};
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const upstream = await fetch(target, {headers});
     const body = await upstream.text();
     res.writeHead(upstream.status, {"Content-Type":"application/json; charset=utf-8", "Cache-Control":"public, max-age=300"});
     res.end(body);
@@ -53,12 +58,12 @@ function serveStatic(res, pathname) {
 
 const server = http.createServer(async (req, res) => {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
-  if (requestUrl.pathname === "/api/status") return json(res, 200, {tmdbConfigured:Boolean(token)});
+  if (requestUrl.pathname === "/api/status") return json(res, 200, {tmdbConfigured});
   if (requestUrl.pathname === "/api/tmdb") return proxyTmdb(req, res, requestUrl);
   serveStatic(res, decodeURIComponent(requestUrl.pathname));
 });
 
 server.listen(PORT, "127.0.0.1", () => {
   console.log(`偏爱已启动：http://127.0.0.1:${PORT}`);
-  console.log(token ? "TMDB 片库已配置。" : "尚未配置 TMDB_READ_TOKEN，当前使用演示片库。");
+  console.log(tmdbConfigured ? "TMDB 片库已配置。" : "尚未配置 TMDB 凭证，当前使用演示片库。");
 });
